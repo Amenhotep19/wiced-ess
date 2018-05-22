@@ -47,7 +47,7 @@ void setLed(wiced_gpio_t pin, int state)
 wiced_result_t ess_init()
 {
     /* default to WICED_I2C_1 */
-    ess_init_on_port(WICED_I2C_1);
+    return ess_init_on_port(WICED_I2C_1);
 }
 
 wiced_result_t ess_init_on_port(wiced_i2c_t port)
