@@ -30,6 +30,7 @@
 
 #include "wiced.h"
 #include "sensirion_ess.h"
+#include "sensirion_common_wiced.h"
 
 #include "sgp30.h"
 #include "sht.h"
@@ -45,6 +46,14 @@ void setLed(wiced_gpio_t pin, int state)
 
 wiced_result_t ess_init()
 {
+    /* default to WICED_I2C_1 */
+    ess_init_on_port(WICED_I2C_1);
+}
+
+wiced_result_t ess_init_on_port(wiced_i2c_t port)
+{
+    sensirion_wiced_set_i2c_port(port);
+
     wiced_gpio_init(ESS_LED_RED, OUTPUT_PUSH_PULL);
     wiced_gpio_init(ESS_LED_YEL, OUTPUT_PUSH_PULL);
     wiced_gpio_init(ESS_LED_GRN, OUTPUT_PUSH_PULL);

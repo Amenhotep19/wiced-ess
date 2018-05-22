@@ -39,6 +39,7 @@
 #define ESS_LED_GRN WICED_GPIO_24
 
 wiced_result_t ess_init();
+wiced_result_t ess_init_on_port(wiced_i2c_t port);
 
 wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm);
 wiced_result_t ess_measure_rht(s32* temperature, s32* humidity);

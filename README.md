@@ -2,7 +2,7 @@
 
 This is a preview release WICED Wifi SDK support for the [Sensirion Environmental Sensor Shield (ESS)](https://developer.sensirion.com/ess/)
 
-It has been tested on the [Future Nebula platform](http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=NEB1DX01FCS1089735), and small changes might be necessary to run on other boards.
+It has been tested on the [Future Nebula platform](http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=NEB1DX01FCS1089735), and small changes might be necessary to run on other boards (see section "Adapting to a new Wiced Platform")
 
 ## Installation
 1. download one of the release ZIPs from https://github.com/winkj/wiced-ess/releases (you can also clone the git repository, in which case the decompression step below isn't necessary).
@@ -27,5 +27,7 @@ It has been tested on the [Future Nebula platform](http://www.futureelectronics.
 
 this should build the app, download it to the board and reset the board. Connect a serial terminal to the serial-usb port of your WICED board, and you should see printouts of the TVOC, CO2eq, humidity and temperature values.
     
+## Adapting to a new Wiced Platform
 
+By default, the code uses the first I2C bus ("port"), named ``WICED_I2C_1``. If your platform has multiple I2C ports, and you're running the ESS on another bus, simply use ``ess_init_on_port()`` to initialize the board, and pass the port name as an argument, for example ``ess_init_on_port(WICED_I2C_2)``.
 

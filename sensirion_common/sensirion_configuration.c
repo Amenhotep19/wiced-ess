@@ -32,7 +32,6 @@
 
 #include "i2c.h"
 
-
 /*
  * INSTRUCTIONS
  * ============
@@ -41,9 +40,9 @@
  * Follow the function specification in the comments.
  */
 
-static wiced_i2c_device_t gSgp30Wicedi2cDevice = {
-    .port = PLATFORM_ARDUINO_I2C,
-    .address = 0x58, /* TODO: fix this! */
+static wiced_i2c_device_t gWicedi2cDeviceTmpl = {
+    .port = WICED_I2C_1, /* default */
+    .address = 0x0,
     .address_width = I2C_ADDRESS_WIDTH_7BIT,
     .speed_mode = I2C_STANDARD_SPEED_MODE
 };
@@ -54,7 +53,7 @@ static wiced_i2c_device_t gSgp30Wicedi2cDevice = {
  */
 void sensirion_i2c_init()
 {
-    wiced_i2c_init(&gSgp30Wicedi2cDevice);
+    wiced_i2c_init(&gWicedi2cDeviceTmpl);
 }
 
 /**
@@ -72,13 +71,18 @@ int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count)
     wiced_result_t wres;
     wiced_i2c_message_t msg;
 
-    gSgp30Wicedi2cDevice.address = address;
+    /* create a copy to avoid a race condition */
+    static wiced_i2c_device_t tmpDevice;
+    tmpDevice.port          = gWicedi2cDeviceTmpl.port;
+    tmpDevice.address_width = gWicedi2cDeviceTmpl.address_width;
+    tmpDevice.speed_mode    = gWicedi2cDeviceTmpl.speed_mode;
+    tmpDevice.address       = address;
 
     if((wres = wiced_i2c_init_rx_message(&msg, data, count, 1, WICED_TRUE)) != WICED_SUCCESS){
         return wres;
     }
 
-    return wiced_i2c_transfer(&gSgp30Wicedi2cDevice, &msg, 1);
+    return wiced_i2c_transfer(&tmpDevice, &msg, 1);
 }
 
 /**
@@ -97,13 +101,18 @@ int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count)
     wiced_result_t wres;
     wiced_i2c_message_t msg;
 
-    gSgp30Wicedi2cDevice.address = address;
+    /* create a copy to avoid a race condition */
+    static wiced_i2c_device_t tmpDevice;
+    tmpDevice.port          = gWicedi2cDeviceTmpl.port;
+    tmpDevice.address_width = gWicedi2cDeviceTmpl.address_width;
+    tmpDevice.speed_mode    = gWicedi2cDeviceTmpl.speed_mode;
+    tmpDevice.address       = address;
 
     if((wres = wiced_i2c_init_tx_message(&msg, data, count, 1, WICED_TRUE)) != WICED_SUCCESS){
         return wres;
     }
 
-    return wiced_i2c_transfer(&gSgp30Wicedi2cDevice, &msg, 1);
+    return wiced_i2c_transfer(&tmpDevice, &msg, 1);
 }
 
 /**
@@ -114,4 +123,16 @@ int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count)
  */
 void sensirion_sleep_usec(uint32_t useconds) {
     wiced_rtos_delay_milliseconds((useconds / 1000) + 1);
+}
+
+
+/**
+ * Wiced specific: select a different I2C port
+ *
+ *
+ * @param useconds the sleep time in microseconds
+ */
+void sensirion_wiced_set_i2c_port(wiced_i2c_t port)
+{
+    gWicedi2cDeviceTmpl.port = port;
 }
