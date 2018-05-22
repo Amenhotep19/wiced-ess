@@ -27,6 +27,36 @@ It has been tested on the [Future Nebula platform](http://www.futureelectronics.
 
 this should build the app, download it to the board and reset the board. Connect a serial terminal to the serial-usb port of your WICED board, and you should see printouts of the TVOC, CO2eq, humidity and temperature values.
     
+## API definition
+The sensirion_ess library has five functions:
+
+```c
+wiced_result_t ess_init();
+```
+``ess_init()`` initializes the ESS, probes the sensors, and makes sure the right sensor versions are detected. Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
+
+```c
+wiced_result_t ess_init_on_port(wiced_i2c_t port);
+```
+Like ``ess_init()`` above, but takes an argument to specify the Wiced I2C port. See section "dapting to a new Wiced Platform" below fo more information. 
+
+Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
+
+```c
+wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm);
+```
+Triggers an Indoor Air Quality (IAQ) measurement, and assigns result to ``tvoc_ppb`` and ``co2_eq_ppm`` respectively. Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
+
+```c
+wiced_result_t ess_measure_rht(s32* temperature, s32* humidity);
+```
+Triggers a humidity and temperature measurement, and assigns result to ``temperature`` and ``humidity`` respectively. Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise. Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
+
+```c
+void ess_set_leds_ryg(int r, int y, int g);
+```
+Toggles LEDs on and off. Pass ``1`` to turn LED on, ``0`` to turn it off. ``r`` is for the red LED, ``y`` is the yellow one, ``g`` is for the green one.
+
 ## Adapting to a new Wiced Platform
 
 By default, the code uses the first I2C bus ("port"), named ``WICED_I2C_1``. If your platform has multiple I2C ports, and you're running the ESS on another bus, simply use ``ess_init_on_port()`` to initialize the board, and pass the port name as an argument, for example ``ess_init_on_port(WICED_I2C_2)``.
