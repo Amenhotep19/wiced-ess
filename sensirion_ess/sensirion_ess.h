@@ -31,6 +31,16 @@
 #ifndef _SENSIRION_ESS_H
 #define _SENSIRION_ESS_H
 
+
+/**
+ * @file
+ *
+ * @brief Wiced interface for Sensirion Environmental Sensor Shield
+ *
+ * This module provides convenient functions to use the ESS on
+ * Wiced Wifi based platforms
+ */
+
 /*
  * Mapping of the ESS LEDs
  */
@@ -38,13 +48,46 @@
 #define ESS_LED_YEL WICED_GPIO_18
 #define ESS_LED_GRN WICED_GPIO_24
 
+/**
+ * initialize the ESS board on default I2C port (WICED_I2C_1)
+ * @return WICED_SUCCESS on success, WICED_ERROR otherwise
+ */
 wiced_result_t ess_init();
+
+/**
+ * initialize the ESS board on a specific I2C port
+ * @param port the I2C port the ESS is connected to
+ * @return WICED_SUCCESS on success, WICED_ERROR otherwise
+ */
 wiced_result_t ess_init_on_port(wiced_i2c_t port);
 
+/**
+ * trigger a measurement of Indoor Air Quality (IAQ), and
+ * store values in @a tvoc_ppb and @a co2_eq_ppm4
+ * Note: the first 15-20s, the ESS is in an initialization
+ * mode, and will return default values (0ppb/400ppm)
+ *
+ * @param (output) tvoc_ppb Total VOC level in parts per billion
+ * @param (output) co2_eq_ppm CO2 equivalent in parts per million
+ * @return WICED_SUCCESS on success, WICED_ERROR otherwise
+ */
 wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm);
+
+/**
+ * trigger a measurement of humidity and temperature, and
+ * store values in @a temperature and @a humidity
+ *
+ * @param (output) temperature temperature value in degree celcius
+ * @param (output) humidity humidity value in percent (0..100%)
+ */
 wiced_result_t ess_measure_rht(s32* temperature, s32* humidity);
 
-
+/**
+ * control the red, yellow and green LED on the ESS
+ * @param r pass 1 to turn red    LED on, 0 to turn it off
+ * @param y pass 1 to turn yellow LED on, 0 to turn it off
+ * @param g pass 1 to turn green  LED on, 0 to turn it off
+ */
 void ess_set_leds_ryg(int r, int y, int g);
 
 #endif /* _SENSIRION_ESS_H */
