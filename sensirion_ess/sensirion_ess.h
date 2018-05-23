@@ -31,6 +31,7 @@
 #ifndef _SENSIRION_ESS_H
 #define _SENSIRION_ESS_H
 
+#include "sensirion_common.h"
 
 /**
  * @file
