@@ -121,4 +121,5 @@ void ess_configure_leds(wiced_gpio_t pinRed, wiced_gpio_t pinYellow, wiced_gpio_
     gEssLedGreen = pinGreen;
     gLedGpiosConfigured = 1;
     ess_init_gpios();
+    ess_set_leds_ryg(0, 0, 0);
 }
