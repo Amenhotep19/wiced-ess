@@ -42,13 +42,6 @@
  * Wiced Wifi based platforms
  */
 
-/*
- * Mapping of the ESS LEDs
- */
-#define ESS_LED_RED WICED_GPIO_32
-#define ESS_LED_YEL WICED_GPIO_18
-#define ESS_LED_GRN WICED_GPIO_24
-
 /**
  * initialize the ESS board on default I2C port (WICED_I2C_1)
  * @return WICED_SUCCESS on success, WICED_ERROR otherwise
@@ -90,5 +83,14 @@ wiced_result_t ess_measure_rht(s32* temperature, s32* humidity);
  * @param g pass 1 to turn green  LED on, 0 to turn it off
  */
 void ess_set_leds_ryg(int r, int y, int g);
+
+/**
+ * configure gpio pins for R/Y/G LEDS on ESS
+ * @param pinRed    pin the red    LED is connected to (Arduino pin  #9)
+ * @param pinYellow pin the yellow LED is connected to (Arduino pin #10)
+ * @param pinGreen  pin the green  LED is connected to (Arduino pin #11)
+ */
+void ess_configure_leds(wiced_gpio_t pinRed, wiced_gpio_t pinYellow, wiced_gpio_t pinGreen);
+
 
 #endif /* _SENSIRION_ESS_H */

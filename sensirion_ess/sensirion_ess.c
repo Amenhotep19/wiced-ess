@@ -35,14 +35,10 @@
 #include "sgp30.h"
 #include "sht.h"
 
-void setLed(wiced_gpio_t pin, int state)
-{
-    if (state) {
-        wiced_gpio_output_high(pin);
-    } else {
-        wiced_gpio_output_low(pin);
-    }
-}
+static s8 gLedGpiosConfigured     = 0;
+static wiced_gpio_t gEssLedRed    = 0;
+static wiced_gpio_t gEssLedYellow = 0;
+static wiced_gpio_t gEssLedGreen  = 0;
 
 wiced_result_t ess_init()
 {
@@ -53,10 +49,6 @@ wiced_result_t ess_init()
 wiced_result_t ess_init_on_port(wiced_i2c_t port)
 {
     sensirion_wiced_set_i2c_port(port);
-
-    wiced_gpio_init(ESS_LED_RED, OUTPUT_PUSH_PULL);
-    wiced_gpio_init(ESS_LED_YEL, OUTPUT_PUSH_PULL);
-    wiced_gpio_init(ESS_LED_GRN, OUTPUT_PUSH_PULL);
 
     if (sgp_probe() != STATUS_OK) {
         WPRINT_APP_INFO(("SGP sensor probing failed\n"));
@@ -94,9 +86,39 @@ wiced_result_t ess_measure_rht(s32* temperature, s32* humidity)
     }
 }
 
+void ess_set_led(wiced_gpio_t pin, int state)
+{
+    if (state) {
+        wiced_gpio_output_high(pin);
+    } else {
+        wiced_gpio_output_low(pin);
+    }
+}
+
+void ess_init_gpios()
+{
+    if (gLedGpiosConfigured) {
+        wiced_gpio_init(gEssLedRed, OUTPUT_PUSH_PULL);
+        wiced_gpio_init(gEssLedYellow, OUTPUT_PUSH_PULL);
+        wiced_gpio_init(gEssLedGreen, OUTPUT_PUSH_PULL);
+    }
+}
+
+
 void ess_set_leds_ryg(int r, int y, int g)
 {
-    setLed(ESS_LED_RED, r);
-    setLed(ESS_LED_YEL, y);
-    setLed(ESS_LED_GRN, g);
+    if (gLedGpiosConfigured) {
+        ess_set_led(gEssLedRed, r);
+        ess_set_led(gEssLedYellow, y);
+        ess_set_led(gEssLedGreen, g);
+    }
+}
+
+void ess_configure_leds(wiced_gpio_t pinRed, wiced_gpio_t pinYellow, wiced_gpio_t pinGreen)
+{
+    gEssLedRed = pinRed;
+    gEssLedYellow = pinYellow;
+    gEssLedGreen = pinGreen;
+    gLedGpiosConfigured = 1;
+    ess_init_gpios();
 }
