@@ -28,25 +28,29 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ESS_LED_MAPPINGS_H
-#define _ESS_LED_MAPPINGS_H
+#include "wiced.h"
+#include "ess_device_configs.h"
 
-#define ESS_NEBULA_LED_RED WICED_GPIO_32
-#define ESS_NEBULA_LED_YEL WICED_GPIO_18
-#define ESS_NEBULA_LED_GRN WICED_GPIO_24
+const ess_device_config_t ESS_DEVICE_CONFIG_DEFAULT = {
+    .i2c_port              = WICED_I2C_1,
+    .needs_init_workaround = 0,
+    .leds_supported        = 0
+};
 
-#define ESS_QUICKSILVER_LED_RED WICED_GPIO_36
-#define ESS_QUICKSILVER_LED_YEL WICED_GPIO_22
-#define ESS_QUICKSILVER_LED_GRN WICED_GPIO_21
+const ess_device_config_t ESS_DEVICE_CONFIG_NEBULA = {
+        .i2c_port              = WICED_I2C_1,
+        .needs_init_workaround = 0,
+        .leds_supported        = 1,
+        .pin_red               = WICED_GPIO_32,
+        .pin_yellow            = WICED_GPIO_18,
+        .pin_green             = WICED_GPIO_24
+};
 
-/*
- * Use one of the following macros to initialize LEDs for a particular platform
- */
-#define ESS_USE_NEBULA_LEDS(X) \
-    ess_configure_leds(ESS_NEBULA_LED_RED, ESS_NEBULA_LED_YEL, ESS_NEBULA_LED_GRN);
-
-#define ESS_USE_QUICKSILVER_LEDS(X) \
-    ess_configure_leds(ESS_QUICKSILVER_LED_RED, ESS_QUICKSILVER_LED_YEL, ESS_QUICKSILVER_LED_GRN);
-
-
-#endif /* _ESS_LED_MAPPINGS_H */
+const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER = {
+        .i2c_port              = WICED_I2C_2,
+        .needs_init_workaround = 0,
+        .leds_supported        = 1,
+        .pin_red               = WICED_GPIO_36,
+        .pin_yellow            = WICED_GPIO_22,
+        .pin_green             = WICED_GPIO_21
+};

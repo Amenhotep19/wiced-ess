@@ -31,6 +31,10 @@
 #ifndef _SENSIRION_ESS_H
 #define _SENSIRION_ESS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "sensirion_common.h"
 
 /**
@@ -42,32 +46,22 @@
  * Wiced Wifi based platforms
  */
 
-typedef enum {
-    ESS_MODE_ALL = 0,
-    ESS_MODE_SHT_ONLY,
-    ESS_MODE_SGP_ONLY
-} ess_mode_t;
+typedef struct {
+    wiced_i2c_t i2c_port;
+    uint8_t needs_init_workaround;
+    uint8_t leds_supported;
+    wiced_gpio_t pin_red;
+    wiced_gpio_t pin_green;
+    wiced_gpio_t pin_yellow;
+} ess_device_config_t;
 
-/**
- * initialize the ESS board on default I2C port (WICED_I2C_1)
- * @return WICED_SUCCESS on success, WICED_ERROR otherwise
- */
-wiced_result_t ess_init();
-
-/**
- * initialize the ESS board on a specific I2C port
- * @param port the I2C port the ESS is connected to
- * @return WICED_SUCCESS on success, WICED_ERROR otherwise
- */
-wiced_result_t ess_init_on_port(wiced_i2c_t port);
 
 /**
  * initialize the ESS board on a specific I2C port
  * @param port the I2C port the ESS is connected to
- * @param whether to use both sensors, SHT only, or SGP only
  * @return WICED_SUCCESS on success, WICED_ERROR otherwise
  */
-wiced_result_t ess_init_on_port_with_flags(wiced_i2c_t port, ess_mode_t mode);
+wiced_result_t ess_init(const ess_device_config_t* config);
 
 /**
  * trigger a measurement of Indoor Air Quality (IAQ), and
@@ -98,13 +92,8 @@ wiced_result_t ess_measure_rht(s32* temperature, s32* humidity);
  */
 void ess_set_leds_ryg(int r, int y, int g);
 
-/**
- * configure gpio pins for R/Y/G LEDS on ESS
- * @param pinRed    pin the red    LED is connected to (Arduino pin  #9)
- * @param pinYellow pin the yellow LED is connected to (Arduino pin #10)
- * @param pinGreen  pin the green  LED is connected to (Arduino pin #11)
- */
-void ess_configure_leds(wiced_gpio_t pinRed, wiced_gpio_t pinYellow, wiced_gpio_t pinGreen);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SENSIRION_ESS_H */

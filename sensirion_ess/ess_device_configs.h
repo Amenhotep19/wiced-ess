@@ -28,53 +28,23 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "wiced.h"
+
+#ifndef _ESS_DEVICE_CONFIGS_H
+#define _ESS_DEVICE_CONFIGS_H
 
 #include "sensirion_ess.h"
-#include "ess_device_configs.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern const ess_device_config_t ESS_DEVICE_CONFIG_DEFAULT;
+extern const ess_device_config_t ESS_DEVICE_CONFIG_NEBULA;
+extern const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER;
 
 
-#define DELAY_TIME 500
-
-
-void application_start( )
-{
-    u16 tvoc_ppb, co2_eq_ppm;
-    s32 temperature, humidity;
-
-    wiced_init();
-
-    WPRINT_APP_INFO(("ESS demo\n"));
-
-    while (ess_init(&ESS_DEVICE_CONFIG_DEFAULT) != WICED_SUCCESS) {
-        WPRINT_APP_INFO(("ESS  probing failed\n"));
-        wiced_rtos_delay_milliseconds(DELAY_TIME);
-    }
-
-    while (1) {
-        wiced_result_t ret = ess_measure_iaq(&tvoc_ppb, &co2_eq_ppm);
-        if (ret == WICED_SUCCESS) {
-            WPRINT_APP_INFO(("tVOC %4u | CO2eq %4u | ", tvoc_ppb, co2_eq_ppm));
-        } else {
-            WPRINT_APP_INFO(("error reading IAQ values\n"));
-        }
-
-        if (co2_eq_ppm > 3000) {
-            ess_set_leds_ryg(1, 0, 0);
-        } else if (co2_eq_ppm > 1000) {
-            ess_set_leds_ryg(0, 1, 0);
-        } else {
-            ess_set_leds_ryg(0, 0, 1);
-        }
-
-        ret = ess_measure_rht(&temperature, &humidity);
-        if (ret == WICED_SUCCESS) {
-            WPRINT_APP_INFO(("T   %2.2f | RH   %2.2f\n", temperature / 1000.0f, humidity / 1000.0f));
-        } else {
-            WPRINT_APP_INFO(("error reading RH/T values\n"));
-        }
-
-        wiced_rtos_delay_milliseconds(1000);
-    }
-
+#ifdef __cplusplus
 }
+#endif
+
+#endif

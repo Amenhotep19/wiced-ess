@@ -35,51 +35,69 @@
 #include "sgp30.h"
 #include "sht.h"
 
-static s8 gLedGpiosConfigured     = 0;
-static wiced_gpio_t gEssLedRed    = 0;
-static wiced_gpio_t gEssLedYellow = 0;
-static wiced_gpio_t gEssLedGreen  = 0;
+#include "sensirion_i2c.h" /* for init hack */
 
-static s8 gSHTEnabled = 0;
-static s8 gSGPEnabled = 0;
+static ess_device_config_t gDeviceConfig;
 
-wiced_result_t ess_init()
+wiced_result_t ess_init_iaq(wiced_i2c_t port)
 {
-    /* default to WICED_I2C_1 */
-    return ess_init_on_port(WICED_I2C_1);
-}
+    wiced_result_t wres;
+    uint8_t data[2] = { 0x20, 0x03 }; // init IAQ
+    const int SGP30_I2C_ADDR = 0x58;
 
-wiced_result_t ess_init_on_port(wiced_i2c_t port)
-{
-    return ess_init_on_port_with_flags(port, ESS_MODE_ALL);
-}
-
-wiced_result_t ess_init_on_port_with_flags(wiced_i2c_t port, ess_mode_t mode)
-{
-    gSHTEnabled = 1;
-    gSGPEnabled = 1;
-    if (mode == ESS_MODE_SHT_ONLY) {
-        gSGPEnabled = 0;
-    } else if (mode == ESS_MODE_SGP_ONLY) {
-        gSHTEnabled = 0;
+    wres = sensirion_i2c_write(SGP30_I2C_ADDR, data, 2);
+    if (wres != WICED_SUCCESS) {
+        WPRINT_APP_INFO(("ess_init_iaq: Write command failed\n"));
+        return wres;
     }
 
-    sensirion_wiced_set_i2c_port(port);
+    WPRINT_APP_INFO((">> I: Init IAQ success\n"));
+    return WICED_SUCCESS;
+}
 
-    if (gSGPEnabled) {
-        if (sgp_probe() != STATUS_OK) {
-            WPRINT_APP_INFO(("SGP sensor probing failed\n"));
-            return WICED_ERROR;
-        }
-        // TODO: check err
-        //u16 err = sgp_iaq_init();
-        sgp_iaq_init();
+wiced_result_t ess_init(const ess_device_config_t* config)
+{
+    if (config == NULL) {
+        return WICED_BADOPTION;
     }
-    if (gSHTEnabled) {
-        if (sht_probe() != STATUS_OK) {
-            WPRINT_APP_INFO(("SHT sensor probing failed\n"));
-            return WICED_ERROR;
-        }
+
+    gDeviceConfig.i2c_port              = config->i2c_port;
+    gDeviceConfig.leds_supported        = config->leds_supported;
+    gDeviceConfig.needs_init_workaround = config->needs_init_workaround;
+    gDeviceConfig.pin_red               = config->pin_red;
+    gDeviceConfig.pin_yellow            = config->pin_yellow;
+    gDeviceConfig.pin_green             = config->pin_green;
+
+    sensirion_wiced_set_i2c_port(config->i2c_port);
+
+    if (config->leds_supported) {
+        wiced_gpio_init(gDeviceConfig.pin_red,    OUTPUT_PUSH_PULL);
+        wiced_gpio_init(gDeviceConfig.pin_yellow, OUTPUT_PUSH_PULL);
+        wiced_gpio_init(gDeviceConfig.pin_green,  OUTPUT_PUSH_PULL);
+    }
+
+    if (config->needs_init_workaround) {
+        /*
+         * for some reason, some boards return faulty results before running init IAQ.
+         *
+         * This is under investigation; for the time being, calling init iaq before
+         * sgp_probe() fixes this
+         */
+        ess_init_iaq(config->i2c_port);
+        wiced_rtos_delay_milliseconds(500);
+    }
+
+    if (sgp_probe() != STATUS_OK) {
+        WPRINT_APP_INFO(("SGP sensor probing failed\n"));
+        return WICED_ERROR;
+    }
+    // TODO: check err
+    //u16 err = sgp_iaq_init();
+    sgp_iaq_init();
+
+    if (sht_probe() != STATUS_OK) {
+        WPRINT_APP_INFO(("SHT sensor probing failed\n"));
+        return WICED_ERROR;
     }
 
     return WICED_SUCCESS;
@@ -87,10 +105,6 @@ wiced_result_t ess_init_on_port_with_flags(wiced_i2c_t port, ess_mode_t mode)
 
 wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm)
 {
-    if (!gSGPEnabled) {
-        return WICED_BADOPTION;
-    }
-
     u16 err = sgp_measure_iaq_blocking_read(tvoc_ppb, co2_eq_ppm);
     if (err == STATUS_OK) {
         return WICED_SUCCESS;
@@ -101,9 +115,6 @@ wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm)
 
 wiced_result_t ess_measure_rht(s32* temperature, s32* humidity)
 {
-    if (!gSHTEnabled) {
-        return WICED_BADOPTION;
-    }
     s8 ret = sht_measure_blocking_read(temperature, humidity);
     if (ret == STATUS_OK) {
         return WICED_SUCCESS;
@@ -121,31 +132,11 @@ void ess_set_led(wiced_gpio_t pin, int state)
     }
 }
 
-void ess_init_gpios()
-{
-    if (gLedGpiosConfigured) {
-        wiced_gpio_init(gEssLedRed, OUTPUT_PUSH_PULL);
-        wiced_gpio_init(gEssLedYellow, OUTPUT_PUSH_PULL);
-        wiced_gpio_init(gEssLedGreen, OUTPUT_PUSH_PULL);
-    }
-}
-
-
 void ess_set_leds_ryg(int r, int y, int g)
 {
-    if (gLedGpiosConfigured) {
-        ess_set_led(gEssLedRed, r);
-        ess_set_led(gEssLedYellow, y);
-        ess_set_led(gEssLedGreen, g);
+    if (gDeviceConfig.leds_supported) {
+        ess_set_led(gDeviceConfig.pin_red, r);
+        ess_set_led(gDeviceConfig.pin_yellow, y);
+        ess_set_led(gDeviceConfig.pin_green, g);
     }
-}
-
-void ess_configure_leds(wiced_gpio_t pinRed, wiced_gpio_t pinYellow, wiced_gpio_t pinGreen)
-{
-    gEssLedRed = pinRed;
-    gEssLedYellow = pinYellow;
-    gEssLedGreen = pinGreen;
-    gLedGpiosConfigured = 1;
-    ess_init_gpios();
-    ess_set_leds_ryg(0, 0, 0);
 }

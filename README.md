@@ -28,18 +28,14 @@ It has been tested on the [Future Nebula platform](http://www.futureelectronics.
 this should build the app, download it to the board and reset the board. Connect a serial terminal to the serial-usb port of your WICED board, and you should see printouts of the TVOC, CO2eq, humidity and temperature values.
     
 ## API definition
-The sensirion_ess library has five functions:
+The sensirion_ess library has four functions:
 
 ```c
-wiced_result_t ess_init();
+wiced_result_t ess_init(ess_device_config_t config);
 ```
-``ess_init()`` initializes the ESS, probes the sensors, and makes sure the right sensor versions are detected. Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
-
-```c
-wiced_result_t ess_init_on_port(wiced_i2c_t port);
-```
-Like ``ess_init()`` above, but takes an argument to specify the Wiced I2C port. See section "dapting to a new Wiced Platform" below fo more information. 
-
+``ess_init(ess_device_config_t config)`` initializes the ESS, probes the sensors, and makes sure the right sensor versions are detected. 
+The ``config`` parameter configures platform specific settings. There are sample configurations in ``ess_device_configs.{h,c}``, including
+a default config that is using ``WICED_I2C_1``, with LED support disabled. To run that, simply call ``ess_init(&ESS_DEVICE_CONFIG_DEFAULT)``.
 Will return ``WICED_SUCCESS`` on success, ``WICED_ERROR`` otherwise.
 
 ```c
@@ -59,5 +55,24 @@ Toggles LEDs on and off. Pass ``1`` to turn LED on, ``0`` to turn it off. ``r`` 
 
 ## Adapting to a new Wiced Platform
 
-By default, the code uses the first I2C bus ("port"), named ``WICED_I2C_1``. If your platform has multiple I2C ports, and you're running the ESS on another bus, simply use ``ess_init_on_port()`` to initialize the board, and pass the port name as an argument, for example ``ess_init_on_port(WICED_I2C_2)``.
+To port to a new platform, create a ess_device_config_t to match your platform; there's a default config in ``ess_device_configs.c``, which looks like this:
+```c
+const ess_device_config_t ESS_DEVICE_CONFIG_DEFAULT = {
+    .i2c_port              = WICED_I2C_1,
+    .needs_init_workaround = 0,
+    .leds_supported        = 0
+};
+```
+The most common change would be to change the I2C port to something else, for example ``WICED_I2C_2``.
 
+To add support for the LEDs on the ESS, set the ``.leds_supported`` field to ``1``, and set the GPIO numbers accordingly. Here an example for the [Arrow Quicksilver](https://www.arrow.com/quicksilver) platform:
+```c
+const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER = {
+        .i2c_port              = WICED_I2C_2,
+        .needs_init_workaround = 0,
+        .leds_supported        = 1,
+        .pin_red               = WICED_GPIO_36,
+        .pin_yellow            = WICED_GPIO_22,
+        .pin_green             = WICED_GPIO_21
+};
+```
