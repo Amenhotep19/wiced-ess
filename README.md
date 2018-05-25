@@ -2,7 +2,7 @@
 
 This is a preview release WICED Wifi SDK support for the [Sensirion Environmental Sensor Shield (ESS)](https://developer.sensirion.com/ess/)
 
-It has been tested on the [Future Nebula platform](http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=NEB1DX01FCS1089735), and small changes might be necessary to run on other boards (see section "Adapting to a new Wiced Platform")
+It has been tested on the [Future Nebula](http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=NEB1DX01FCS1089735) and [Arrow Quicksilver](https://www.arrow.com/quicksilver) platforms, and small changes might be necessary to run on other boards (see section "Adapting to a new Wiced Platform")
 
 ## Installation
 1. download one of the release ZIPs from https://github.com/winkj/wiced-ess/releases (you can also clone the git repository, in which case the decompression step below isn't necessary).
@@ -65,7 +65,7 @@ const ess_device_config_t ESS_DEVICE_CONFIG_DEFAULT = {
 ```
 The most common change would be to change the I2C port to something else, for example ``WICED_I2C_2``.
 
-To add support for the LEDs on the ESS, set the ``.leds_supported`` field to ``1``, and set the GPIO numbers accordingly. Here an example for the [Arrow Quicksilver](https://www.arrow.com/quicksilver) platform:
+To add support for the LEDs on the ESS, set the ``.leds_supported`` field to ``1``, and set the GPIO numbers accordingly. Here an example for the Arrow Quicksilver platform:
 ```c
 const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER = {
         .i2c_port              = WICED_I2C_2,
