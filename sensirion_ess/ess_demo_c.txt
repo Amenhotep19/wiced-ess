@@ -58,7 +58,7 @@ void application_start( )
     while (1) {
         wiced_result_t ret = ess_measure_iaq(&tvoc_ppb, &co2_eq_ppm);
         if (ret == WICED_SUCCESS) {
-            WPRINT_APP_INFO(("tVOC %u | CO2eq %u\n", tvoc_ppb, co2_eq_ppm));
+            WPRINT_APP_INFO(("tVOC %4u | CO2eq %4u | ", tvoc_ppb, co2_eq_ppm));
         } else if (ret == WICED_BADOPTION) {
             // SGP disabled; ignore
         } else {
@@ -75,7 +75,7 @@ void application_start( )
 
         ret = ess_measure_rht(&temperature, &humidity);
         if (ret == WICED_SUCCESS) {
-            WPRINT_APP_INFO(("T %0.2f | RH %0.2f\n", temperature / 1000.0f, humidity / 1000.0f));
+            WPRINT_APP_INFO(("T   %2.2f | RH   %2.2f\n", temperature / 1000.0f, humidity / 1000.0f));
         } else if (ret == WICED_BADOPTION) {
             // SHT disabled, ignore
         } else {
