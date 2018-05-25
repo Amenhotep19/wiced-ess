@@ -29,9 +29,13 @@
  */
 
 #include "wiced.h"
+
 #include "sensirion_ess.h"
+#include "ess_led_mappings.h"
+
 
 #define DELAY_TIME 500
+
 
 void application_start( )
 {
@@ -41,6 +45,10 @@ void application_start( )
     wiced_init();
 
     WPRINT_APP_INFO(("ESS demo\n"));
+
+    // See ess_led_mappings for preexisting LED mappings
+    // ESS_USE_NEBULA_LEDS();
+    // ESS_USE_QUICKSILVER_LEDS();
 
     while (ess_init() != WICED_SUCCESS) {
         WPRINT_APP_INFO(("ESS  probing failed\n"));

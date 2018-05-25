@@ -39,4 +39,14 @@
 #define ESS_QUICKSILVER_LED_YEL WICED_GPIO_22
 #define ESS_QUICKSILVER_LED_GRN WICED_GPIO_21
 
+/*
+ * Use one of the following macros to initialize LEDs for a particular platform
+ */
+#define ESS_USE_NEBULA_LEDS(X) \
+    ess_configure_leds(ESS_NEBULA_LED_RED, ESS_NEBULA_LED_YEL, ESS_NEBULA_LED_GRN);
+
+#define ESS_USE_QUICKSILVER_LEDS(X) \
+    ess_configure_leds(ESS_QUICKSILVER_LED_RED, ESS_QUICKSILVER_LED_YEL, ESS_QUICKSILVER_LED_GRN);
+
+
 #endif /* _ESS_LED_MAPPINGS_H */
