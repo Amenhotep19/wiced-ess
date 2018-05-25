@@ -40,6 +40,9 @@ static wiced_gpio_t gEssLedRed    = 0;
 static wiced_gpio_t gEssLedYellow = 0;
 static wiced_gpio_t gEssLedGreen  = 0;
 
+static s8 gSHTEnabled = 0;
+static s8 gSGPEnabled = 0;
+
 wiced_result_t ess_init()
 {
     /* default to WICED_I2C_1 */
@@ -48,26 +51,46 @@ wiced_result_t ess_init()
 
 wiced_result_t ess_init_on_port(wiced_i2c_t port)
 {
+    return ess_init_on_port_with_flags(port, ESS_MODE_ALL);
+}
+
+wiced_result_t ess_init_on_port_with_flags(wiced_i2c_t port, ess_mode_t mode)
+{
+    gSHTEnabled = 1;
+    gSGPEnabled = 1;
+    if (mode == ESS_MODE_SHT_ONLY) {
+        gSGPEnabled = 0;
+    } else if (mode == ESS_MODE_SGP_ONLY) {
+        gSHTEnabled = 0;
+    }
+
     sensirion_wiced_set_i2c_port(port);
 
-    if (sgp_probe() != STATUS_OK) {
-        WPRINT_APP_INFO(("SGP sensor probing failed\n"));
-        return WICED_ERROR;
+    if (gSGPEnabled) {
+        if (sgp_probe() != STATUS_OK) {
+            WPRINT_APP_INFO(("SGP sensor probing failed\n"));
+            return WICED_ERROR;
+        }
+        // TODO: check err
+        //u16 err = sgp_iaq_init();
+        sgp_iaq_init();
     }
-    if (sht_probe() != STATUS_OK) {
-        WPRINT_APP_INFO(("SHT sensor probing failed\n"));
-        return WICED_ERROR;
+    if (gSHTEnabled) {
+        if (sht_probe() != STATUS_OK) {
+            WPRINT_APP_INFO(("SHT sensor probing failed\n"));
+            return WICED_ERROR;
+        }
     }
-
-    // TODO: check err
-    //u16 err = sgp_iaq_init();
-    sgp_iaq_init();
 
     return WICED_SUCCESS;
 }
 
 wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm)
 {
+    if (!gSGPEnabled) {
+        return WICED_BADOPTION;
+    }
+
     u16 err = sgp_measure_iaq_blocking_read(tvoc_ppb, co2_eq_ppm);
     if (err == STATUS_OK) {
         return WICED_SUCCESS;
@@ -78,6 +101,9 @@ wiced_result_t ess_measure_iaq(u16* tvoc_ppb, u16* co2_eq_ppm)
 
 wiced_result_t ess_measure_rht(s32* temperature, s32* humidity)
 {
+    if (!gSHTEnabled) {
+        return WICED_BADOPTION;
+    }
     s8 ret = sht_measure_blocking_read(temperature, humidity);
     if (ret == STATUS_OK) {
         return WICED_SUCCESS;

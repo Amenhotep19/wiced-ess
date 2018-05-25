@@ -42,6 +42,12 @@
  * Wiced Wifi based platforms
  */
 
+typedef enum {
+    ESS_MODE_ALL = 0,
+    ESS_MODE_SHT_ONLY,
+    ESS_MODE_SGP_ONLY
+} ess_mode_t;
+
 /**
  * initialize the ESS board on default I2C port (WICED_I2C_1)
  * @return WICED_SUCCESS on success, WICED_ERROR otherwise
@@ -54,6 +60,14 @@ wiced_result_t ess_init();
  * @return WICED_SUCCESS on success, WICED_ERROR otherwise
  */
 wiced_result_t ess_init_on_port(wiced_i2c_t port);
+
+/**
+ * initialize the ESS board on a specific I2C port
+ * @param port the I2C port the ESS is connected to
+ * @param whether to use both sensors, SHT only, or SGP only
+ * @return WICED_SUCCESS on success, WICED_ERROR otherwise
+ */
+wiced_result_t ess_init_on_port_with_flags(wiced_i2c_t port, ess_mode_t mode);
 
 /**
  * trigger a measurement of Indoor Air Quality (IAQ), and

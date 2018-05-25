@@ -56,8 +56,11 @@ void application_start( )
     }
 
     while (1) {
-        if (ess_measure_iaq(&tvoc_ppb, &co2_eq_ppm) == WICED_SUCCESS) {
+        wiced_result_t ret = ess_measure_iaq(&tvoc_ppb, &co2_eq_ppm);
+        if (ret == WICED_SUCCESS) {
             WPRINT_APP_INFO(("tVOC %u | CO2eq %u\n", tvoc_ppb, co2_eq_ppm));
+        } else if (ret == WICED_BADOPTION) {
+            // SGP disabled; ignore
         } else {
             WPRINT_APP_INFO(("error reading IAQ values\n"));
         }
@@ -70,8 +73,11 @@ void application_start( )
             ess_set_leds_ryg(0, 0, 1);
         }
 
-        if (ess_measure_rht(&temperature, &humidity) == WICED_SUCCESS) {
+        ret = ess_measure_rht(&temperature, &humidity);
+        if (ret == WICED_SUCCESS) {
             WPRINT_APP_INFO(("T %0.2f | RH %0.2f\n", temperature / 1000.0f, humidity / 1000.0f));
+        } else if (ret == WICED_BADOPTION) {
+            // SHT disabled, ignore
         } else {
             WPRINT_APP_INFO(("error reading RH/T values\n"));
         }
