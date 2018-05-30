@@ -48,7 +48,7 @@ const ess_device_config_t ESS_DEVICE_CONFIG_NEBULA = {
 
 const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER = {
         .i2c_port              = WICED_I2C_2,
-        .needs_init_workaround = 0,
+        .needs_init_workaround = 1,
         .leds_supported        = 1,
         .pin_red               = WICED_GPIO_36,
         .pin_yellow            = WICED_GPIO_22,
