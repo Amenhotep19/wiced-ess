@@ -44,7 +44,7 @@ extern "C" {
 #define NULL ((void *)0)
 #endif
 
-#ifdef BIG_ENDIAN
+#if _BYTE_ORDER == _BIG_ENDIAN
 #define be16_to_cpu(s) (s)
 #define be32_to_cpu(s) (s)
 #define be64_to_cpu(s) (s)
