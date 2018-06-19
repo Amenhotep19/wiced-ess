@@ -47,7 +47,7 @@ void application_start( )
     WPRINT_APP_INFO(("ESS demo\n"));
 
     while (ess_init(&ESS_DEVICE_CONFIG_DEFAULT) != WICED_SUCCESS) {
-        WPRINT_APP_INFO(("ESS  probing failed\n"));
+        WPRINT_APP_INFO(("ESS probing failed\n"));
         wiced_rtos_delay_milliseconds(DELAY_TIME);
     }
 
