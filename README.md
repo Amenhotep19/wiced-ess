@@ -10,7 +10,7 @@ It has been tested on the [Future Nebula](http://www.futureelectronics.com/en/Te
 3. rename the directory from ``wiced-ess`` to ``sensirion``
 4. Copy directory `sensirion` (Windows: right click on folder, select "copy")
 5. switch back to Wiced Studio
-6. Right click on ``43xxx_Wi-Fi > libraries > sensors`` and choose ``Paste``
+6. Right click on ``43xxx_Wi-Fi > drivers > libraries > sensors`` and choose ``Paste``
 
 ## Creating a demo app
 1. Open `43xxx_Wi-Fi > libraries > sensors > sensirion > sensirion_ess`
