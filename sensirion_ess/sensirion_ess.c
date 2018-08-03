@@ -39,6 +39,11 @@
 
 static ess_device_config_t gDeviceConfig;
 
+
+/* Debugging */
+// #define ESS_DBG_CONT_ON_PROBE_ERROR 1
+// #define ESS_DBG_FORCE_INIT_WORKAROUND 1
+
 wiced_result_t ess_init_iaq(wiced_i2c_t port)
 {
     wiced_result_t wres;
@@ -76,20 +81,30 @@ wiced_result_t ess_init(const ess_device_config_t* config)
         wiced_gpio_init(gDeviceConfig.pin_green,  OUTPUT_PUSH_PULL);
     }
 
-    if (config->needs_init_workaround) {
-        /*
-         * for some reason, some boards return faulty results before running init IAQ.
-         *
-         * This is under investigation; for the time being, calling init iaq before
-         * sgp_probe() fixes this
-         */
+
+    /*
+     * for some reason, some boards return faulty results before running init IAQ.
+     *
+     * This is under investigation; for the time being, calling init iaq before
+     * sgp_probe() fixes this
+     */
+    int execute_workaround = config->needs_init_workaround;
+#ifdef ESS_DBG_FORCE_INIT_WORKAROUND
+    execute_workaround = 1;
+    WPRINT_APP_INFO(("DBG: init workaround forced\n"));
+#endif
+    if (execute_workaround) {
         ess_init_iaq(config->i2c_port);
         wiced_rtos_delay_milliseconds(500);
     }
 
     if (sgp_probe() != STATUS_OK) {
         WPRINT_APP_INFO(("SGP sensor probing failed\n"));
+#ifndef ESS_DBG_CONT_ON_PROBE_ERROR
         return WICED_ERROR;
+#else
+        WPRINT_APP_INFO(("DBG: ignoring SGP probing failure\n"));
+#endif
     }
     // TODO: check err
     //u16 err = sgp_iaq_init();
