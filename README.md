@@ -70,3 +70,23 @@ const ess_device_config_t ESS_DEVICE_CONFIG_QUICKSILVER = {
         .pin_green             = WICED_GPIO_21
 };
 ```
+
+## Debugging
+
+If you're getting errors during the probing of the SGP sensors, please make sure you're using the correct I2C port; if the I2C port is correct, `drivers > sensors > sensirion > sensirion_ess > sensirion_ess.c` offers two preprocessor defines that can help narrow down the problem. At the top of the file, you'll see the following block:
+
+```c
+/* Debugging */
+// #define ESS_DBG_CONT_ON_PROBE_ERROR 1
+// #define ESS_DBG_FORCE_INIT_WORKAROUND 1
+```
+
+remove the leading `//` to enable those two.
+
+### Ignore the SGP probing error - ESS_DBG_CONT_ON_PROBE_ERROR
+By setting `ESS_DBG_CONT_ON_PROBE_ERROR` to 1, the ESS library is instructed to continue even if there was an error with the SGP probing. The code will then continue to probe the SHT sensor; if that fails as well, it's likely that there's something wrong in the I2C configuration. If the SHT sensor probes fine, the code will continue, and the sample app will read out humidity and temperature values. In that case, there's likely an issue with the probing that has to be looked at more closely; there is however a workaround for SGP probing implemented already, see below
+
+### Apply an SGP probing workaround - ESS_DBG_FORCE_INIT_WORKAROUND
+By setting the `ESS_DBG_FORCE_INIT_WORKAROUND` to 1, the ESS library will apply a workaround while probing the SGP sensor. If this solves the probing error, simply edit your `ess_device_config_t` device configuration and set the `needs_init_workaround` to 1
+
+
